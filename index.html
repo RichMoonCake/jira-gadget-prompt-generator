@@ -13,9 +13,17 @@
         <p class="eyebrow">Forge • Jira Cloud • Prompt Builder</p>
         <h1>Generador de prompts para gadgets Forge</h1>
         <p class="subtitle">
-          Rellena los campos para generar el prompt maestro para construir nuevos gadgets.
+          Rellena los campos, usa un preset si te ayuda y genera un prompt listo para pegar.
         </p>
       </header>
+
+      <div class="actions top-actions">
+        <button class="btn btn-secondary" onclick="applyPreset('timeline')">Preset Timeline</button>
+        <button class="btn btn-secondary" onclick="applyPreset('sla')">Preset SLA</button>
+        <button class="btn btn-secondary" onclick="applyPreset('aging')">Preset Aging</button>
+        <button class="btn btn-secondary" onclick="applyPreset('workload')">Preset Workload</button>
+        <button class="btn btn-secondary" onclick="applyPreset('budget')">Preset Budget vs Actual</button>
+      </div>
 
       <div class="form-grid">
         <div class="field full">
@@ -86,6 +94,7 @@
             <option value="project">Project</option>
             <option value="component">Component</option>
             <option value="label">Label</option>
+            <option value="sin agrupación">Sin agrupación</option>
             <option value="otro">Otro</option>
           </select>
         </div>
@@ -94,7 +103,7 @@
           <label for="period">Periodo visual</label>
           <select id="period">
             <option value="">Selecciona una opción</option>
-            <option value="sí, máximo 12 meses">Sí, máximo 12 meses</option>
+            <option value="sí, máximo de 12 meses y año actual completo por defecto">Sí, máximo 12 meses</option>
             <option value="sí, con rango libre">Sí, con rango libre</option>
             <option value="año actual completo por defecto">Año actual completo por defecto</option>
             <option value="sin periodo visual">Sin periodo visual</option>
