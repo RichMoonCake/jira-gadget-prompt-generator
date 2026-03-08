@@ -1,1 +1,76 @@
-<! Hola mundo >
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Jira Forge Gadget Prompt Generator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Forge Jira Gadget Prompt Generator</h1>
+
+<div class="form-container">
+
+<label>Nombre del gadget</label>
+<input id="name" type="text">
+
+<label>Objetivo de negocio</label>
+<textarea id="goal"></textarea>
+
+<label>Inputs de configuración</label>
+<textarea id="inputs"></textarea>
+
+<label>Fields Jira</label>
+<textarea id="fields"></textarea>
+
+<label>Tipo de análisis</label>
+<select id="analysis">
+<option>temporal</option>
+<option>categórico</option>
+<option>KPI</option>
+<option>mixto</option>
+</select>
+
+<label>Cálculo principal</label>
+<textarea id="mainCalc"></textarea>
+
+<label>Cálculos secundarios</label>
+<textarea id="secondaryCalc"></textarea>
+
+<label>Visualización</label>
+<input id="visual" type="text" placeholder="BarChart / LineChart / PieChart">
+
+<label>Agrupación</label>
+<input id="grouping" type="text">
+
+<label>Periodo visual</label>
+<input id="period" type="text">
+
+<label>Tratamiento de tickets inválidos</label>
+<textarea id="invalid"></textarea>
+
+<label>Reglas de filtrado</label>
+<textarea id="filter"></textarea>
+
+<label>Branding</label>
+<input id="branding" type="text">
+
+<label>Restricciones especiales</label>
+<textarea id="restrictions"></textarea>
+
+<div class="buttons">
+<button onclick="generatePrompt()">Generar prompt</button>
+<button onclick="copyPrompt()">Copiar prompt</button>
+</div>
+
+</div>
+
+<h2>Prompt generado</h2>
+
+<textarea id="result"></textarea>
+
+<script src="script.js"></script>
+
+</body>
+</html>
