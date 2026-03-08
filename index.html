@@ -1,76 +1,114 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Jira Forge Gadget Prompt Generator</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forge Jira Gadget Prompt Generator</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <main class="page">
+    <section class="card">
+      <header class="hero">
+        <p class="eyebrow">Forge • Jira Cloud • Prompt Builder</p>
+        <h1>Generador de prompts para gadgets Forge</h1>
+        <p class="subtitle">
+          Rellena los campos, genera el prompt maestro v2 y pégamelo para construir nuevos gadgets.
+        </p>
+      </header>
 
-<h1>Forge Jira Gadget Prompt Generator</h1>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="name">Nombre del gadget</label>
+          <input id="name" type="text" placeholder="Ej. Timeline Date Metrics Gadget" />
+        </div>
 
-<div class="form-container">
+        <div class="field full">
+          <label for="goal">Objetivo de negocio</label>
+          <textarea id="goal" placeholder="Ej. Medir el tiempo medio entre dos fechas configurables por periodo visual"></textarea>
+        </div>
 
-<label>Nombre del gadget</label>
-<input id="name" type="text">
+        <div class="field full">
+          <label for="inputs">Inputs de configuración</label>
+          <textarea id="inputs" placeholder="- JQL base&#10;- campo fecha inicial&#10;- campo fecha final&#10;- rango visual inicio&#10;- rango visual fin"></textarea>
+        </div>
 
-<label>Objetivo de negocio</label>
-<textarea id="goal"></textarea>
+        <div class="field full">
+          <label for="fields">Fields Jira</label>
+          <textarea id="fields" placeholder="- created&#10;- resolutiondate&#10;- customfield_12345"></textarea>
+        </div>
 
-<label>Inputs de configuración</label>
-<textarea id="inputs"></textarea>
+        <div class="field">
+          <label for="analysis">Tipo de análisis</label>
+          <select id="analysis">
+            <option>temporal</option>
+            <option>categórico</option>
+            <option>KPI</option>
+            <option>mixto</option>
+          </select>
+        </div>
 
-<label>Fields Jira</label>
-<textarea id="fields"></textarea>
+        <div class="field">
+          <label for="visual">Visualización</label>
+          <input id="visual" type="text" placeholder="Ej. KPI + BarChart + LineChart" />
+        </div>
 
-<label>Tipo de análisis</label>
-<select id="analysis">
-<option>temporal</option>
-<option>categórico</option>
-<option>KPI</option>
-<option>mixto</option>
-</select>
+        <div class="field full">
+          <label for="mainCalc">Cálculo principal</label>
+          <textarea id="mainCalc" placeholder="Ej. Diferencia media entre dos fechas por mes"></textarea>
+        </div>
 
-<label>Cálculo principal</label>
-<textarea id="mainCalc"></textarea>
+        <div class="field full">
+          <label for="secondaryCalc">Cálculos secundarios</label>
+          <textarea id="secondaryCalc" placeholder="- acumulado mensual&#10;- media total del periodo"></textarea>
+        </div>
 
-<label>Cálculos secundarios</label>
-<textarea id="secondaryCalc"></textarea>
+        <div class="field">
+          <label for="grouping">Agrupación</label>
+          <input id="grouping" type="text" placeholder="Ej. mes" />
+        </div>
 
-<label>Visualización</label>
-<input id="visual" type="text" placeholder="BarChart / LineChart / PieChart">
+        <div class="field">
+          <label for="period">Periodo visual</label>
+          <input id="period" type="text" placeholder="Ej. sí, máximo 12 meses" />
+        </div>
 
-<label>Agrupación</label>
-<input id="grouping" type="text">
+        <div class="field full">
+          <label for="invalid">Tratamiento de tickets inválidos</label>
+          <textarea id="invalid" placeholder="Ej. excluir tickets sin ambas fechas informadas"></textarea>
+        </div>
 
-<label>Periodo visual</label>
-<input id="period" type="text">
+        <div class="field full">
+          <label for="filter">Reglas de filtrado</label>
+          <textarea id="filter" placeholder="Ej. filtrar por field2 dentro del periodo visual"></textarea>
+        </div>
 
-<label>Tratamiento de tickets inválidos</label>
-<textarea id="invalid"></textarea>
+        <div class="field">
+          <label for="branding">Branding</label>
+          <input id="branding" type="text" placeholder="Ej. Capitole Consulting" />
+        </div>
 
-<label>Reglas de filtrado</label>
-<textarea id="filter"></textarea>
+        <div class="field">
+          <label for="restrictions">Restricciones especiales</label>
+          <input id="restrictions" type="text" placeholder="Ej. acotar JQL automáticamente al periodo visual" />
+        </div>
+      </div>
 
-<label>Branding</label>
-<input id="branding" type="text">
+      <div class="actions">
+        <button class="btn btn-primary" onclick="generatePrompt()">Generar prompt</button>
+        <button class="btn btn-secondary" onclick="copyPrompt()">Copiar prompt</button>
+      </div>
+    </section>
 
-<label>Restricciones especiales</label>
-<textarea id="restrictions"></textarea>
+    <section class="card result-card">
+      <div class="result-header">
+        <h2>Prompt generado</h2>
+        <p>Listo para copiar y pegar.</p>
+      </div>
+      <textarea id="result" placeholder="Aquí aparecerá el prompt..."></textarea>
+    </section>
+  </main>
 
-<div class="buttons">
-<button onclick="generatePrompt()">Generar prompt</button>
-<button onclick="copyPrompt()">Copiar prompt</button>
-</div>
-
-</div>
-
-<h2>Prompt generado</h2>
-
-<textarea id="result"></textarea>
-
-<script src="script.js"></script>
-
+  <script src="script.js"></script>
 </body>
 </html>
