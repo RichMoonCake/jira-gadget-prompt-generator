@@ -1,22 +1,240 @@
 function getValue(id) {
-  return document.getElementById(id).value.trim();
+  const element = document.getElementById(id);
+  return element ? element.value.trim() : "";
+}
+
+function setValue(id, value) {
+  const element = document.getElementById(id);
+  if (element) {
+    element.value = value;
+  }
+}
+
+function normalizeMultiline(value, fallback) {
+  return value && value.trim() ? value.trim() : fallback;
+}
+
+function normalizeSimple(value, fallback) {
+  return value && value.trim() ? value.trim() : fallback;
+}
+
+function inferDefaults({ analysis, visual, grouping, period, filter, invalid, restrictions }) {
+  let inferredVisual = visual;
+  let inferredGrouping = grouping;
+  let inferredPeriod = period;
+  let inferredFilter = filter;
+  let inferredInvalid = invalid;
+  let inferredRestrictions = restrictions;
+
+  if (!inferredVisual) {
+    if (analysis === "temporal") inferredVisual = "KPI + BarChart + LineChart";
+    else if (analysis === "categórico") inferredVisual = "KPI + BarChart";
+    else if (analysis === "KPI") inferredVisual = "KPI";
+    else inferredVisual = "KPI + BarChart + LineChart";
+  }
+
+  if (!inferredGrouping) {
+    if (analysis === "temporal") inferredGrouping = "mes";
+    else if (analysis === "categórico") inferredGrouping = "categoría";
+    else if (analysis === "KPI") inferredGrouping = "sin agrupación";
+    else inferredGrouping = "mes";
+  }
+
+  if (!inferredPeriod) {
+    if (analysis === "temporal" || analysis === "mixto") {
+      inferredPeriod = "sí, máximo de 12 meses y año actual completo por defecto";
+    } else {
+      inferredPeriod = "si aplica, configurable";
+    }
+  }
+
+  if (!inferredFilter) {
+    if (analysis === "temporal" || analysis === "mixto") {
+      inferredFilter = "Aplicar la JQL base y acotar automáticamente al periodo visual usando un campo fecha de referencia configurable.";
+    } else {
+      inferredFilter = "Aplicar la JQL base antes del cálculo y excluir issues fuera del criterio configurado.";
+    }
+  }
+
+  if (!inferredInvalid) {
+    inferredInvalid = "Excluir del cálculo los tickets que no tengan informados los campos necesarios para la métrica.";
+  }
+
+  if (!inferredRestrictions) {
+    inferredRestrictions = "El gadget debe soportar campos estándar y custom fields, mantener una configuración estable y construir JQL válidas.";
+  }
+
+  return {
+    visual: inferredVisual,
+    grouping: inferredGrouping,
+    period: inferredPeriod,
+    filter: inferredFilter,
+    invalid: inferredInvalid,
+    restrictions: inferredRestrictions
+  };
+}
+
+function buildSmartRecommendations({ analysis, fields, inputs, grouping }) {
+  const notes = [];
+
+  if ((analysis === "temporal" || analysis === "mixto") && !/fecha/i.test(fields + " " + inputs)) {
+    notes.push("- Detecto análisis temporal o mixto sin campo fecha de referencia explícito; añade uno si el cálculo depende de eje temporal.");
+  }
+
+  if (grouping.toLowerCase().includes("mes") && !/fecha/i.test(fields + " " + inputs)) {
+    notes.push("- La agrupación por mes requiere un campo fecha claro para filtrar, agrupar y construir el eje X.");
+  }
+
+  if (analysis === "categórico" && grouping.toLowerCase().includes("mes")) {
+    notes.push("- Detecto mezcla entre análisis categórico y agrupación temporal; considera marcar el análisis como mixto si aplica.");
+  }
+
+  if (notes.length === 0) {
+    notes.push("- La definición parece consistente para generar un gadget robusto.");
+  }
+
+  return notes.join("\n");
+}
+
+function applyPreset(type) {
+  clearForm();
+
+  const presets = {
+    timeline: {
+      name: "Timeline Date Metrics Gadget",
+      goal: "Medir el tiempo medio entre dos fechas configurables con vista mensual y acumulada.",
+      inputs: "- JQL base\n- campo fecha inicial\n- campo fecha final\n- rango visual inicio\n- rango visual fin\n- máximo de issues",
+      fields: "- created\n- resolutiondate\n- customfield fecha",
+      analysis: "temporal",
+      mainCalc: "Diferencia media entre dos fechas por mes.",
+      secondaryCalc: "- acumulado mensual\n- media total del periodo",
+      visual: "KPI + BarChart + LineChart",
+      grouping: "mes",
+      period: "sí, máximo de 12 meses y año actual completo por defecto",
+      invalid: "Excluir tickets sin ambas fechas informadas.",
+      filter: "Aplicar la JQL base y acotar automáticamente al periodo visual usando el campo fecha final.",
+      branding: "Capitole Consulting",
+      restrictions: "Soportar custom fields de fecha y JQL acotada automáticamente."
+    },
+    sla: {
+      name: "SLA Analytics Gadget",
+      goal: "Analizar tiempos SLA por periodo visual y detectar tendencias mensuales.",
+      inputs: "- JQL base\n- campo fecha inicio\n- campo fecha fin\n- rango visual\n- máximo de issues",
+      fields: "- created\n- resolved\n- customfield SLA date",
+      analysis: "temporal",
+      mainCalc: "Tiempo medio entre inicio y fin del SLA.",
+      secondaryCalc: "- acumulado mensual\n- media total del periodo",
+      visual: "KPI + BarChart + LineChart",
+      grouping: "mes",
+      period: "sí, máximo de 12 meses y año actual completo por defecto",
+      invalid: "Excluir tickets sin ambas fechas SLA.",
+      filter: "Filtrar por el campo fecha final del SLA dentro del periodo visual.",
+      branding: "Capitole Consulting",
+      restrictions: "Usar JQL acotada y soportar fields custom de fecha."
+    },
+    aging: {
+      name: "Aging by Status Gadget",
+      goal: "Mostrar envejecimiento medio de tickets abiertos por estado.",
+      inputs: "- JQL base\n- campo fecha de referencia\n- campo status\n- rango visual\n- máximo de issues",
+      fields: "- created\n- status\n- updated",
+      analysis: "mixto",
+      mainCalc: "Días transcurridos desde la fecha de referencia hasta hoy.",
+      secondaryCalc: "- media por estado\n- distribución por estado",
+      visual: "KPI + BarChart + PieChart",
+      grouping: "status",
+      period: "sí, máximo de 12 meses y año actual completo por defecto",
+      invalid: "Excluir tickets sin fecha de referencia o sin status.",
+      filter: "Aplicar la JQL base y acotar por fecha de referencia si aplica.",
+      branding: "Capitole Consulting",
+      restrictions: "El gadget debe soportar agrupación categórica y KPIs."
+    },
+    workload: {
+      name: "Workload by Assignee Gadget",
+      goal: "Visualizar carga de tickets por responsable y evolución temporal.",
+      inputs: "- JQL base\n- campo usuario\n- campo fecha de referencia\n- rango visual\n- máximo de issues",
+      fields: "- assignee\n- created\n- resolved",
+      analysis: "mixto",
+      mainCalc: "Conteo de tickets por assignee.",
+      secondaryCalc: "- porcentaje sobre total\n- evolución mensual",
+      visual: "KPI + PieChart + BarChart",
+      grouping: "assignee",
+      period: "sí, máximo de 12 meses y año actual completo por defecto",
+      invalid: "Excluir tickets sin assignee.",
+      filter: "Aplicar la JQL base y filtrar por fecha de referencia dentro del periodo visual.",
+      branding: "Capitole Consulting",
+      restrictions: "Mantener estabilidad en agrupación por usuario."
+    },
+    budget: {
+      name: "Budget vs Actual Cost Gadget",
+      goal: "Mostrar desviación entre presupuesto y coste real con vista mensual y acumulada.",
+      inputs: "- JQL base\n- campo numérico presupuesto\n- campo numérico coste real\n- campo fecha de referencia\n- rango visual\n- máximo de issues",
+      fields: "- customfield numérico presupuesto\n- customfield numérico coste real\n- customfield fecha de referencia",
+      analysis: "mixto",
+      mainCalc: "Diferencia media entre presupuesto y coste real.",
+      secondaryCalc: "- suma mensual de desviación\n- acumulado mensual\n- media total del periodo",
+      visual: "KPI + BarChart + LineChart",
+      grouping: "mes",
+      period: "sí, con rango libre",
+      invalid: "Excluir issues sin ambos campos numéricos o sin fecha de referencia.",
+      filter: "Aplicar la JQL base y acotar automáticamente al periodo visual usando la fecha de referencia.",
+      branding: "Personal brand",
+      restrictions: "Soportar custom fields numéricos y de fecha."
+    }
+  };
+
+  const preset = presets[type];
+  if (!preset) return;
+
+  Object.entries(preset).forEach(([key, value]) => {
+    setValue(key, value);
+  });
 }
 
 function generatePrompt() {
-  const name = getValue("name");
-  const goal = getValue("goal");
-  const inputs = getValue("inputs");
-  const fields = getValue("fields");
-  const analysis = getValue("analysis");
-  const mainCalc = getValue("mainCalc");
-  const secondaryCalc = getValue("secondaryCalc");
-  const visual = getValue("visual");
-  const grouping = getValue("grouping");
-  const period = getValue("period");
-  const invalid = getValue("invalid");
-  const filter = getValue("filter");
-  const branding = getValue("branding");
-  const restrictions = getValue("restrictions");
+  const raw = {
+    name: getValue("name"),
+    goal: getValue("goal"),
+    inputs: getValue("inputs"),
+    fields: getValue("fields"),
+    analysis: getValue("analysis"),
+    mainCalc: getValue("mainCalc"),
+    secondaryCalc: getValue("secondaryCalc"),
+    visual: getValue("visual"),
+    grouping: getValue("grouping"),
+    period: getValue("period"),
+    invalid: getValue("invalid"),
+    filter: getValue("filter"),
+    branding: getValue("branding"),
+    restrictions: getValue("restrictions")
+  };
+
+  const normalized = {
+    name: normalizeSimple(raw.name, "Unnamed Gadget"),
+    goal: normalizeMultiline(raw.goal, "Definir objetivo de negocio del gadget."),
+    inputs: normalizeMultiline(raw.inputs, "- JQL base"),
+    fields: normalizeMultiline(raw.fields, "- created"),
+    analysis: normalizeSimple(raw.analysis, "temporal"),
+    mainCalc: normalizeMultiline(raw.mainCalc, "Definir cálculo principal."),
+    secondaryCalc: normalizeMultiline(raw.secondaryCalc, "- sin cálculos secundarios definidos"),
+    branding: normalizeSimple(raw.branding, "Sin branding")
+  };
+
+  const inferred = inferDefaults({
+    analysis: normalized.analysis,
+    visual: raw.visual,
+    grouping: raw.grouping,
+    period: raw.period,
+    filter: raw.filter,
+    invalid: raw.invalid,
+    restrictions: raw.restrictions
+  });
+
+  const recommendations = buildSmartRecommendations({
+    analysis: normalized.analysis,
+    fields: normalized.fields,
+    inputs: normalized.inputs,
+    grouping: inferred.grouping
+  });
 
   const prompt = `Actúa como un **Principal Atlassian Forge Developer + Product Engineer** especializado en **Jira Cloud dashboard gadgets con Forge UI Kit (\`@forge/react\`)**, con mentalidad de **producto reusable y monetizable en Atlassian Marketplace**.
 
@@ -204,6 +422,7 @@ El gadget debe:
 - evitar fallos comunes de Forge UI Kit con \`Select\`
 - evitar JQL inválidas por concatenación incorrecta
 - mantener el comportamiento estable si el usuario cambia los campos configurados
+- si detectas ambigüedad funcional menor, toma una decisión razonable y explícala
 
 ---
 
@@ -232,50 +451,56 @@ El archivo completo \`src/frontend/index.jsx\`
 # 10) Datos concretos del gadget a construir ahora
 
 ## Nombre del gadget
-${name || "[RELLENAR]"}
+${normalized.name}
 
 ## Objetivo de negocio
-${goal || "[RELLENAR]"}
+${normalized.goal}
 
 ## Inputs de configuración
-${inputs || "[RELLENAR]"}
+${normalized.inputs}
 
 ## Fields Jira relevantes
-${fields || "[RELLENAR]"}
+${normalized.fields}
 
 ## Tipo de análisis
-${analysis || "[RELLENAR]"}
+${normalized.analysis}
 
 ## Cálculo principal
-${mainCalc || "[RELLENAR]"}
+${normalized.mainCalc}
 
 ## Cálculos secundarios
-${secondaryCalc || "[RELLENAR]"}
+${normalized.secondaryCalc}
 
 ## Tipo de visualización
-${visual || "[RELLENAR]"}
+${inferred.visual}
 
 ## Agrupación
-${grouping || "[RELLENAR]"}
+${inferred.grouping}
 
 ## Reglas de filtrado
-${filter || "[RELLENAR]"}
+${inferred.filter}
 
 ## Tratamiento de tickets inválidos
-${invalid || "[RELLENAR]"}
+${inferred.invalid}
 
 ## Periodo visual
-${period || "[RELLENAR]"}
+${inferred.period}
 
 ## Branding
-${branding || "[RELLENAR]"}
+${normalized.branding}
 
 ## Restricciones especiales
-${restrictions || "[RELLENAR]"}
+${inferred.restrictions}
 
 ---
 
-# 11) Requisitos extra de salida
+# 11) Recomendaciones detectadas por el generador
+
+${recommendations}
+
+---
+
+# 12) Requisitos extra de salida
 
 Tu código debe estar listo para pegar en \`src/frontend/index.jsx\`.
 
@@ -287,23 +512,23 @@ No ignores los edge cases del periodo visual o de la JQL.
 Hazlo como si fuera un gadget real que voy a desplegar en un sandbox de cliente y potencialmente convertir en producto de Marketplace.
 `;
 
-  document.getElementById("result").value = prompt;
+  setValue("result", prompt);
 }
 
 async function copyPrompt() {
-  const result = document.getElementById("result");
-  const text = result.value;
+  const result = getValue("result");
 
-  if (!text) {
+  if (!result) {
     alert("Primero genera un prompt.");
     return;
   }
 
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(result);
     alert("Prompt copiado");
   } catch (error) {
-    result.select();
+    const textarea = document.getElementById("result");
+    textarea.select();
     document.execCommand("copy");
     alert("Prompt copiado");
   }
@@ -315,20 +540,17 @@ function clearForm() {
     "goal",
     "inputs",
     "fields",
-    "analysis",
     "mainCalc",
     "secondaryCalc",
-    "visual",
-    "grouping",
-    "period",
-    "invalid",
-    "filter",
-    "branding",
     "restrictions",
     "result"
-  ].forEach((id) => {
-    document.getElementById(id).value = "";
-  });
+  ].forEach((id) => setValue(id, ""));
 
-  document.getElementById("analysis").value = "temporal";
+  setValue("analysis", "temporal");
+  setValue("visual", "");
+  setValue("grouping", "");
+  setValue("period", "");
+  setValue("invalid", "");
+  setValue("filter", "");
+  setValue("branding", "");
 }
