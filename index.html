@@ -9,21 +9,23 @@
 <body>
   <main class="page">
     <section class="layout">
+
+      <!-- ── COLUMN 1: Form ─────────────────────────────────────────────── -->
       <section class="card form-card">
         <header class="hero">
-          <p class="eyebrow">Forge • Jira Cloud • Prompt Builder</p>
-          <h1>Generador de prompts para gadgets Forge</h1>
+          <p class="eyebrow">Forge · Jira Cloud · Prompt Builder</p>
+          <h1>Generador de prompts<br>para gadgets Forge</h1>
           <p class="subtitle">
             Rellena los campos, usa un preset si te ayuda y genera un prompt listo para pegar.
           </p>
         </header>
 
         <div class="actions top-actions">
-          <button type="button" class="btn btn-secondary" id="preset-timeline">Preset Timeline</button>
-          <button type="button" class="btn btn-secondary" id="preset-sla">Preset SLA</button>
-          <button type="button" class="btn btn-secondary" id="preset-aging">Preset Aging</button>
-          <button type="button" class="btn btn-secondary" id="preset-workload">Preset Workload</button>
-          <button type="button" class="btn btn-secondary" id="preset-budget">Preset Budget vs Actual</button>
+          <button type="button" class="btn btn-secondary" id="preset-timeline">⏱ Timeline</button>
+          <button type="button" class="btn btn-secondary" id="preset-sla">📊 SLA</button>
+          <button type="button" class="btn btn-secondary" id="preset-aging">🕰 Aging</button>
+          <button type="button" class="btn btn-secondary" id="preset-workload">👥 Workload</button>
+          <button type="button" class="btn btn-secondary" id="preset-budget">💰 Budget vs Actual</button>
         </div>
 
         <div class="form-grid form-spacing">
@@ -144,14 +146,43 @@
         </div>
       </section>
 
+      <!-- ── COLUMN 2: Prompt preview ───────────────────────────────────── -->
       <aside class="card preview-card">
         <div class="result-header">
-          <h2>Vista previa lateral</h2>
-          <p>El prompt se actualiza al generar o aplicar un preset.</p>
+          <h2>Vista previa del prompt</h2>
+          <p>Se actualiza al generar o aplicar un preset.</p>
         </div>
-
         <textarea id="result" placeholder="Aquí aparecerá el prompt..."></textarea>
       </aside>
+
+      <!-- ── COLUMN 3: Gadget visual preview ───────────────────────────── -->
+      <aside class="card gadget-preview-card">
+        <div class="result-header">
+          <div>
+            <h2>Boceto del gadget</h2>
+            <p>Vista estimativa basada en tu configuración.</p>
+          </div>
+          <span class="preview-badge">Live preview</span>
+        </div>
+
+        <div class="gadget-window" id="gadget-preview">
+          <!-- Placeholder before generating -->
+          <div class="gadget-titlebar">
+            <div class="titlebar-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="titlebar-name" id="preview-title">— sin configurar —</span>
+          </div>
+          <div class="gadget-body" id="preview-body">
+            <div class="gadget-placeholder">
+              <div class="placeholder-icon">📊</div>
+              <strong>Aún sin datos</strong>
+              <p>Rellena el formulario y pulsa <em>Generar prompt</em> para ver el boceto del gadget.</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
     </section>
   </main>
 
