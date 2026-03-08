@@ -8,150 +8,153 @@
 </head>
 <body>
   <main class="page">
-    <section class="card">
-      <header class="hero">
-        <p class="eyebrow">Forge • Jira Cloud • Prompt Builder</p>
-        <h1>Generador de prompts para gadgets Forge</h1>
-        <p class="subtitle">
-          Rellena los campos, usa un preset si te ayuda y genera un prompt listo para pegar.
-        </p>
-      </header>
+    <section class="layout">
+      <section class="card form-card">
+        <header class="hero">
+          <p class="eyebrow">Forge • Jira Cloud • Prompt Builder</p>
+          <h1>Generador de prompts para gadgets Forge</h1>
+          <p class="subtitle">
+            Rellena los campos, usa un preset si te ayuda y genera un prompt listo para pegar.
+          </p>
+        </header>
 
-      <div class="actions top-actions">
-        <button class="btn btn-secondary" onclick="applyPreset('timeline')">Preset Timeline</button>
-        <button class="btn btn-secondary" onclick="applyPreset('sla')">Preset SLA</button>
-        <button class="btn btn-secondary" onclick="applyPreset('aging')">Preset Aging</button>
-        <button class="btn btn-secondary" onclick="applyPreset('workload')">Preset Workload</button>
-        <button class="btn btn-secondary" onclick="applyPreset('budget')">Preset Budget vs Actual</button>
-      </div>
-
-      <div class="form-grid">
-        <div class="field full">
-          <label for="name">Nombre del gadget</label>
-          <input id="name" type="text" placeholder="Ej. Timeline Date Metrics Gadget" />
+        <div class="actions top-actions">
+          <button type="button" class="btn btn-secondary" id="preset-timeline">Preset Timeline</button>
+          <button type="button" class="btn btn-secondary" id="preset-sla">Preset SLA</button>
+          <button type="button" class="btn btn-secondary" id="preset-aging">Preset Aging</button>
+          <button type="button" class="btn btn-secondary" id="preset-workload">Preset Workload</button>
+          <button type="button" class="btn btn-secondary" id="preset-budget">Preset Budget vs Actual</button>
         </div>
 
-        <div class="field full">
-          <label for="goal">Objetivo de negocio</label>
-          <textarea id="goal" placeholder="Ej. Medir el tiempo medio entre dos fechas configurables por periodo visual"></textarea>
+        <div class="form-grid form-spacing">
+          <div class="field full">
+            <label for="name">Nombre del gadget</label>
+            <input id="name" type="text" placeholder="Ej. Timeline Date Metrics Gadget" />
+          </div>
+
+          <div class="field full">
+            <label for="goal">Objetivo de negocio</label>
+            <textarea id="goal" placeholder="Ej. Medir el tiempo medio entre dos fechas configurables por periodo visual"></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="inputs">Inputs de configuración</label>
+            <textarea id="inputs" placeholder="- JQL base&#10;- campo fecha inicial&#10;- campo fecha final&#10;- rango visual inicio&#10;- rango visual fin"></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="fields">Fields Jira</label>
+            <textarea id="fields" placeholder="- created&#10;- resolutiondate&#10;- customfield_12345"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="analysis">Tipo de análisis</label>
+            <select id="analysis">
+              <option value="temporal">Temporal</option>
+              <option value="categórico">Categórico</option>
+              <option value="KPI">KPI</option>
+              <option value="mixto">Mixto</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="visual">Tipo de visualización</label>
+            <select id="visual">
+              <option value="">Selecciona una opción</option>
+              <option value="KPI">KPI</option>
+              <option value="BarChart">BarChart</option>
+              <option value="LineChart">LineChart</option>
+              <option value="PieChart">PieChart</option>
+              <option value="KPI + BarChart">KPI + BarChart</option>
+              <option value="KPI + LineChart">KPI + LineChart</option>
+              <option value="BarChart + LineChart">BarChart + LineChart</option>
+              <option value="KPI + BarChart + LineChart">KPI + BarChart + LineChart</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="mainCalc">Cálculo principal</label>
+            <textarea id="mainCalc" placeholder="Ej. Diferencia media entre dos fechas por mes"></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="secondaryCalc">Cálculos secundarios</label>
+            <textarea id="secondaryCalc" placeholder="- acumulado mensual&#10;- media total del periodo"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="grouping">Agrupación</label>
+            <select id="grouping">
+              <option value="">Selecciona una opción</option>
+              <option value="mes">Mes</option>
+              <option value="semana">Semana</option>
+              <option value="día">Día</option>
+              <option value="status">Status</option>
+              <option value="assignee">Assignee</option>
+              <option value="priority">Priority</option>
+              <option value="project">Project</option>
+              <option value="component">Component</option>
+              <option value="label">Label</option>
+              <option value="sin agrupación">Sin agrupación</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="period">Periodo visual</label>
+            <select id="period">
+              <option value="">Selecciona una opción</option>
+              <option value="sí, máximo de 12 meses y año actual completo por defecto">Sí, máximo 12 meses</option>
+              <option value="sí, con rango libre">Sí, con rango libre</option>
+              <option value="año actual completo por defecto">Año actual completo por defecto</option>
+              <option value="sin periodo visual">Sin periodo visual</option>
+            </select>
+          </div>
+
+          <div class="field full">
+            <label for="invalid">Tratamiento de tickets inválidos</label>
+            <textarea id="invalid" placeholder="Ej. excluir tickets sin ambas fechas informadas"></textarea>
+          </div>
+
+          <div class="field full">
+            <label for="filter">Reglas de filtrado</label>
+            <textarea id="filter" placeholder="Ej. filtrar por field2 dentro del periodo visual"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="branding">Branding</label>
+            <select id="branding">
+              <option value="">Sin branding</option>
+              <option value="Capitole Consulting">Capitole Consulting</option>
+              <option value="Personal brand">Personal brand</option>
+              <option value="Cliente">Cliente</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="restrictions">Restricciones especiales</label>
+            <input id="restrictions" type="text" placeholder="Ej. acotar JQL automáticamente al periodo visual" />
+          </div>
         </div>
 
-        <div class="field full">
-          <label for="inputs">Inputs de configuración</label>
-          <textarea id="inputs" placeholder="- JQL base&#10;- campo fecha inicial&#10;- campo fecha final&#10;- rango visual inicio&#10;- rango visual fin"></textarea>
+        <div class="actions bottom-actions">
+          <button type="button" class="btn btn-primary" id="generate-btn">Generar prompt</button>
+          <button type="button" class="btn btn-secondary" id="copy-btn">Copiar prompt</button>
+          <button type="button" class="btn btn-ghost" id="clear-btn">Limpiar</button>
+        </div>
+      </section>
+
+      <aside class="card preview-card">
+        <div class="result-header">
+          <h2>Vista previa lateral</h2>
+          <p>El prompt se actualiza al generar o aplicar un preset.</p>
         </div>
 
-        <div class="field full">
-          <label for="fields">Fields Jira</label>
-          <textarea id="fields" placeholder="- created&#10;- resolutiondate&#10;- customfield_12345"></textarea>
-        </div>
-
-        <div class="field">
-          <label for="analysis">Tipo de análisis</label>
-          <select id="analysis">
-            <option value="temporal">Temporal</option>
-            <option value="categórico">Categórico</option>
-            <option value="KPI">KPI</option>
-            <option value="mixto">Mixto</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="visual">Tipo de visualización</label>
-          <select id="visual">
-            <option value="">Selecciona una opción</option>
-            <option value="KPI">KPI</option>
-            <option value="BarChart">BarChart</option>
-            <option value="LineChart">LineChart</option>
-            <option value="PieChart">PieChart</option>
-            <option value="KPI + BarChart">KPI + BarChart</option>
-            <option value="KPI + LineChart">KPI + LineChart</option>
-            <option value="BarChart + LineChart">BarChart + LineChart</option>
-            <option value="KPI + BarChart + LineChart">KPI + BarChart + LineChart</option>
-          </select>
-        </div>
-
-        <div class="field full">
-          <label for="mainCalc">Cálculo principal</label>
-          <textarea id="mainCalc" placeholder="Ej. Diferencia media entre dos fechas por mes"></textarea>
-        </div>
-
-        <div class="field full">
-          <label for="secondaryCalc">Cálculos secundarios</label>
-          <textarea id="secondaryCalc" placeholder="- acumulado mensual&#10;- media total del periodo"></textarea>
-        </div>
-
-        <div class="field">
-          <label for="grouping">Agrupación</label>
-          <select id="grouping">
-            <option value="">Selecciona una opción</option>
-            <option value="mes">Mes</option>
-            <option value="semana">Semana</option>
-            <option value="día">Día</option>
-            <option value="status">Status</option>
-            <option value="assignee">Assignee</option>
-            <option value="priority">Priority</option>
-            <option value="project">Project</option>
-            <option value="component">Component</option>
-            <option value="label">Label</option>
-            <option value="sin agrupación">Sin agrupación</option>
-            <option value="otro">Otro</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="period">Periodo visual</label>
-          <select id="period">
-            <option value="">Selecciona una opción</option>
-            <option value="sí, máximo de 12 meses y año actual completo por defecto">Sí, máximo 12 meses</option>
-            <option value="sí, con rango libre">Sí, con rango libre</option>
-            <option value="año actual completo por defecto">Año actual completo por defecto</option>
-            <option value="sin periodo visual">Sin periodo visual</option>
-          </select>
-        </div>
-
-        <div class="field full">
-          <label for="invalid">Tratamiento de tickets inválidos</label>
-          <textarea id="invalid" placeholder="Ej. excluir tickets sin ambas fechas informadas"></textarea>
-        </div>
-
-        <div class="field full">
-          <label for="filter">Reglas de filtrado</label>
-          <textarea id="filter" placeholder="Ej. filtrar por field2 dentro del periodo visual"></textarea>
-        </div>
-
-        <div class="field">
-          <label for="branding">Branding</label>
-          <select id="branding">
-            <option value="">Sin branding</option>
-            <option value="Capitole Consulting">Capitole Consulting</option>
-            <option value="Personal brand">Personal brand</option>
-            <option value="Cliente">Cliente</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="restrictions">Restricciones especiales</label>
-          <input id="restrictions" type="text" placeholder="Ej. acotar JQL automáticamente al periodo visual" />
-        </div>
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-primary" onclick="generatePrompt()">Generar prompt</button>
-        <button class="btn btn-secondary" onclick="copyPrompt()">Copiar prompt</button>
-        <button class="btn btn-ghost" onclick="clearForm()">Limpiar</button>
-      </div>
-    </section>
-
-    <section class="card result-card">
-      <div class="result-header">
-        <h2>Prompt generado</h2>
-        <p>Listo para copiar y pegar.</p>
-      </div>
-      <textarea id="result" placeholder="Aquí aparecerá el prompt..."></textarea>
+        <textarea id="result" placeholder="Aquí aparecerá el prompt..."></textarea>
+      </aside>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script src="./script.js" defer></script>
 </body>
 </html>
