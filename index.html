@@ -41,16 +41,26 @@
         <div class="field">
           <label for="analysis">Tipo de análisis</label>
           <select id="analysis">
-            <option>temporal</option>
-            <option>categórico</option>
-            <option>KPI</option>
-            <option>mixto</option>
+            <option value="temporal">Temporal</option>
+            <option value="categórico">Categórico</option>
+            <option value="KPI">KPI</option>
+            <option value="mixto">Mixto</option>
           </select>
         </div>
 
         <div class="field">
-          <label for="visual">Visualización</label>
-          <input id="visual" type="text" placeholder="Ej. KPI + BarChart + LineChart" />
+          <label for="visual">Tipo de visualización</label>
+          <select id="visual">
+            <option value="">Selecciona una opción</option>
+            <option value="KPI">KPI</option>
+            <option value="BarChart">BarChart</option>
+            <option value="LineChart">LineChart</option>
+            <option value="PieChart">PieChart</option>
+            <option value="KPI + BarChart">KPI + BarChart</option>
+            <option value="KPI + LineChart">KPI + LineChart</option>
+            <option value="BarChart + LineChart">BarChart + LineChart</option>
+            <option value="KPI + BarChart + LineChart">KPI + BarChart + LineChart</option>
+          </select>
         </div>
 
         <div class="field full">
@@ -65,12 +75,30 @@
 
         <div class="field">
           <label for="grouping">Agrupación</label>
-          <input id="grouping" type="text" placeholder="Ej. mes" />
+          <select id="grouping">
+            <option value="">Selecciona una opción</option>
+            <option value="mes">Mes</option>
+            <option value="semana">Semana</option>
+            <option value="día">Día</option>
+            <option value="status">Status</option>
+            <option value="assignee">Assignee</option>
+            <option value="priority">Priority</option>
+            <option value="project">Project</option>
+            <option value="component">Component</option>
+            <option value="label">Label</option>
+            <option value="otro">Otro</option>
+          </select>
         </div>
 
         <div class="field">
           <label for="period">Periodo visual</label>
-          <input id="period" type="text" placeholder="Ej. sí, máximo 12 meses" />
+          <select id="period">
+            <option value="">Selecciona una opción</option>
+            <option value="sí, máximo 12 meses">Sí, máximo 12 meses</option>
+            <option value="sí, con rango libre">Sí, con rango libre</option>
+            <option value="año actual completo por defecto">Año actual completo por defecto</option>
+            <option value="sin periodo visual">Sin periodo visual</option>
+          </select>
         </div>
 
         <div class="field full">
@@ -85,7 +113,12 @@
 
         <div class="field">
           <label for="branding">Branding</label>
-          <input id="branding" type="text" placeholder="Ej. Capitole Consulting" />
+          <select id="branding">
+            <option value="">Sin branding</option>
+            <option value="Capitole Consulting">Capitole Consulting</option>
+            <option value="Personal brand">Personal brand</option>
+            <option value="Cliente">Cliente</option>
+          </select>
         </div>
 
         <div class="field">
@@ -97,6 +130,7 @@
       <div class="actions">
         <button class="btn btn-primary" onclick="generatePrompt()">Generar prompt</button>
         <button class="btn btn-secondary" onclick="copyPrompt()">Copiar prompt</button>
+        <button class="btn btn-ghost" onclick="clearForm()">Limpiar</button>
       </div>
     </section>
 
