@@ -515,6 +515,20 @@ Hazlo como si fuera un gadget real que voy a desplegar en un sandbox de cliente 
 `;
 
   setValue("result", prompt);
+
+  // Update the gadget visual preview
+  renderGadgetPreview({
+    name: normalized.name,
+    analysis: normalized.analysis,
+    visual: inferred.visual,
+    grouping: inferred.grouping,
+    mainCalc: normalized.mainCalc,
+    secondaryCalc: normalized.secondaryCalc,
+    branding: normalized.branding,
+    period: inferred.period,
+    fields: normalized.fields,
+    goal: normalized.goal
+  });
 }
 
 async function copyPrompt() {
@@ -555,7 +569,236 @@ function clearForm() {
   setValue("invalid", "");
   setValue("filter", "");
   setValue("branding", "");
+
+  // Reset gadget preview
+  resetGadgetPreview();
 }
+
+// ── Gadget Preview ───────────────────────────────────────────────────────────
+
+function resetGadgetPreview() {
+  const titleEl = document.getElementById("preview-title");
+  const bodyEl = document.getElementById("preview-body");
+  if (titleEl) titleEl.textContent = "— sin configurar —";
+  if (bodyEl) {
+    bodyEl.innerHTML = `
+      <div class="gadget-placeholder">
+        <div class="placeholder-icon">📊</div>
+        <strong>Aún sin datos</strong>
+        <p>Rellena el formulario y pulsa <em>Generar prompt</em> para ver el boceto del gadget.</p>
+      </div>`;
+  }
+}
+
+function makeSampleData(grouping, count) {
+  const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const statuses = ["To Do", "In Progress", "Done", "Blocked"];
+  const assignees = ["Ana G.", "Luis M.", "Sara P.", "Carlos R."];
+  const priorities = ["Highest", "High", "Medium", "Low"];
+  const projects = ["PRJ-A", "PRJ-B", "PRJ-C"];
+
+  const maps = {
+    mes: months.slice(0, count),
+    semana: Array.from({ length: count }, (_, i) => `S${i + 1}`),
+    día: Array.from({ length: count }, (_, i) => `D${i + 1}`),
+    status: statuses.slice(0, count),
+    assignee: assignees.slice(0, count),
+    priority: priorities.slice(0, count),
+    project: projects.slice(0, count),
+    component: Array.from({ length: count }, (_, i) => `Comp ${i + 1}`),
+    label: Array.from({ length: count }, (_, i) => `Label ${i + 1}`),
+  };
+
+  const labels = maps[grouping] || months.slice(0, count);
+  const values = Array.from({ length: labels.length }, () => Math.floor(Math.random() * 60) + 10);
+  return { labels, values };
+}
+
+function buildBarLineSVG(labels, values, showLine) {
+  const w = 240;
+  const h = 80;
+  const padL = 4;
+  const padR = 4;
+  const padT = 8;
+  const padB = 4;
+  const innerW = w - padL - padR;
+  const innerH = h - padT - padB;
+  const maxVal = Math.max(...values, 1);
+  const count = labels.length;
+  const barW = Math.max(6, Math.floor(innerW / count) - 3);
+  const slotW = innerW / count;
+
+  // bars
+  let bars = values.map((v, i) => {
+    const bh = Math.max(4, (v / maxVal) * innerH);
+    const x = padL + i * slotW + (slotW - barW) / 2;
+    const y = padT + innerH - bh;
+    return `<rect class="chart-bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${bh.toFixed(1)}" rx="2"/>`;
+  }).join("");
+
+  // line
+  let line = "";
+  if (showLine) {
+    const points = values.map((v, i) => {
+      const cx = padL + i * slotW + slotW / 2;
+      const cy = padT + innerH - (v / maxVal) * innerH;
+      return `${cx.toFixed(1)},${cy.toFixed(1)}`;
+    });
+    const dotCircles = values.map((v, i) => {
+      const cx = padL + i * slotW + slotW / 2;
+      const cy = padT + innerH - (v / maxVal) * innerH;
+      return `<circle class="chart-dot" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="2.5"/>`;
+    }).join("");
+    line = `<polyline class="chart-line-path" points="${points.join(" ")}"/>${dotCircles}`;
+  }
+
+  return `
+    <svg class="chart-svg" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      ${bars}${line}
+    </svg>
+    <div class="chart-x-labels">
+      ${labels.map(l => `<span>${l}</span>`).join("")}
+    </div>`;
+}
+
+function buildPieDonutSVG(labels, values) {
+  const total = values.reduce((a, b) => a + b, 0) || 1;
+  const colors = ["#2C3E50", "#5C7A94", "#7A9478", "#C4BAA8", "#8C7E6A", "#3D5166"];
+  const cx = 50, cy = 50, r = 36, innerR = 22;
+  let startAngle = -Math.PI / 2;
+  let slices = "";
+
+  values.forEach((v, i) => {
+    const angle = (v / total) * 2 * Math.PI;
+    const endAngle = startAngle + angle;
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const ix1 = cx + innerR * Math.cos(endAngle);
+    const iy1 = cy + innerR * Math.sin(endAngle);
+    const ix2 = cx + innerR * Math.cos(startAngle);
+    const iy2 = cy + innerR * Math.sin(startAngle);
+    const large = angle > Math.PI ? 1 : 0;
+    const d = `M${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} L${ix1.toFixed(2)},${iy1.toFixed(2)} A${innerR},${innerR} 0 ${large},0 ${ix2.toFixed(2)},${iy2.toFixed(2)} Z`;
+    slices += `<path d="${d}" fill="${colors[i % colors.length]}" opacity="0.85"/>`;
+    startAngle = endAngle;
+  });
+
+  const legendItems = labels.slice(0, 4).map((l, i) =>
+    `<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:#5A5048;">
+      <span style="width:8px;height:8px;border-radius:2px;background:${colors[i % colors.length]};display:inline-block;flex-shrink:0;"></span>
+      <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70px;">${l}</span>
+    </div>`
+  ).join("");
+
+  return `
+    <div style="display:flex;align-items:center;gap:12px;">
+      <svg viewBox="0 0 100 100" style="width:90px;height:90px;flex-shrink:0;" xmlns="http://www.w3.org/2000/svg">
+        ${slices}
+      </svg>
+      <div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0;">${legendItems}</div>
+    </div>`;
+}
+
+function renderGadgetPreview({ name, analysis, visual, grouping, mainCalc, secondaryCalc, branding, period, fields }) {
+  const titleEl = document.getElementById("preview-title");
+  const bodyEl = document.getElementById("preview-body");
+  if (!titleEl || !bodyEl) return;
+
+  titleEl.textContent = name || "Gadget Preview";
+
+  const v = (visual || "").toLowerCase();
+  const hasKPI = v.includes("kpi");
+  const hasBar = v.includes("bar");
+  const hasLine = v.includes("line");
+  const hasPie = v.includes("pie");
+
+  const effectiveGrouping = grouping || "mes";
+  const sampleCount = ["mes"].includes(effectiveGrouping) ? 6 : 4;
+  const { labels, values } = makeSampleData(effectiveGrouping, sampleCount);
+
+  const total = values.reduce((a, b) => a + b, 0);
+  const avg = total ? (total / values.length).toFixed(1) : "—";
+  const max = Math.max(...values);
+
+  // Derive config tags from fields / period
+  const fieldLines = fields.split("\n").map(l => l.replace(/^-\s*/, "").trim()).filter(Boolean).slice(0, 3);
+  const configTags = fieldLines.map(f => `<span class="config-tag">${f}</span>`).join("");
+  const periodTag = period && period !== "sin periodo visual"
+    ? `<span class="config-tag">📅 ${period.length > 30 ? period.slice(0, 28) + "…" : period}</span>`
+    : "";
+
+  let kpiSection = "";
+  if (hasKPI) {
+    const sec = secondaryCalc.split("\n").map(l => l.replace(/^-\s*/, "").trim()).filter(Boolean);
+    const kpi2Label = sec[0] || "Acumulado";
+    const kpi3Label = sec[1] || "Máximo";
+
+    kpiSection = `
+      <div class="kpi-row">
+        <div class="kpi-box">
+          <div class="kpi-label">${mainCalc.length > 40 ? mainCalc.slice(0, 38) + "…" : mainCalc}</div>
+          <div class="kpi-value">${avg}<span style="font-size:14px;font-family:'DM Sans',sans-serif;font-weight:300;margin-left:4px;opacity:0.7">${analysis === "temporal" ? "días" : "issues"}</span></div>
+          <div class="kpi-sub">Media del periodo · ${sampleCount} ${effectiveGrouping}s</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">${kpi2Label.length > 18 ? kpi2Label.slice(0, 16) + "…" : kpi2Label}</div>
+          <div class="kpi-value" style="font-size:17px;">${total}</div>
+        </div>
+        <div class="kpi-box">
+          <div class="kpi-label">${kpi3Label.length > 18 ? kpi3Label.slice(0, 16) + "…" : kpi3Label}</div>
+          <div class="kpi-value" style="font-size:17px;">${max}</div>
+        </div>
+      </div>`;
+  }
+
+  let chartSection = "";
+  if (hasBar || hasLine) {
+    const chartTitle = hasBar && hasLine
+      ? `Evolución por ${effectiveGrouping} · Barras + Línea`
+      : hasBar ? `Distribución por ${effectiveGrouping}`
+      : `Tendencia por ${effectiveGrouping}`;
+    chartSection = `
+      <div class="chart-placeholder">
+        <div class="chart-label">${chartTitle}</div>
+        ${buildBarLineSVG(labels, values, hasLine)}
+      </div>`;
+  }
+
+  let pieSection = "";
+  if (hasPie) {
+    const pieTitle = `Distribución por ${effectiveGrouping}`;
+    const pieValues = hasBar ? values.map(v => Math.floor(v * 0.6) + 5) : values;
+    pieSection = `
+      <div class="chart-placeholder">
+        <div class="chart-label">${pieTitle}</div>
+        ${buildPieDonutSVG(labels, pieValues)}
+      </div>`;
+  }
+
+  const configSection = (configTags || periodTag) ? `
+    <div class="config-strip">
+      ${configTags}
+      ${periodTag}
+    </div>` : "";
+
+  const brandingSection = branding && branding !== "Sin branding" ? `
+    <div class="branding-strip">
+      <div class="branding-dot"></div>
+      <span>${branding}</span>
+    </div>` : "";
+
+  bodyEl.innerHTML = `
+    ${kpiSection}
+    ${chartSection}
+    ${pieSection}
+    ${configSection}
+    ${brandingSection}
+  `;
+}
+
+// ── Wiring ───────────────────────────────────────────────────────────────────
 
 window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("preset-timeline")?.addEventListener("click", () => applyPreset("timeline"));
