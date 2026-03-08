@@ -81,11 +81,11 @@ function buildSmartRecommendations({ analysis, fields, inputs, grouping }) {
     notes.push("- Detecto análisis temporal o mixto sin campo fecha de referencia explícito; añade uno si el cálculo depende de eje temporal.");
   }
 
-  if (grouping.toLowerCase().includes("mes") && !/fecha/i.test(fields + " " + inputs)) {
+  if ((grouping || "").toLowerCase().includes("mes") && !/fecha/i.test(fields + " " + inputs)) {
     notes.push("- La agrupación por mes requiere un campo fecha claro para filtrar, agrupar y construir el eje X.");
   }
 
-  if (analysis === "categórico" && grouping.toLowerCase().includes("mes")) {
+  if (analysis === "categórico" && (grouping || "").toLowerCase().includes("mes")) {
     notes.push("- Detecto mezcla entre análisis categórico y agrupación temporal; considera marcar el análisis como mixto si aplica.");
   }
 
@@ -188,6 +188,8 @@ function applyPreset(type) {
   Object.entries(preset).forEach(([key, value]) => {
     setValue(key, value);
   });
+
+  generatePrompt();
 }
 
 function generatePrompt() {
@@ -554,3 +556,15 @@ function clearForm() {
   setValue("filter", "");
   setValue("branding", "");
 }
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("preset-timeline")?.addEventListener("click", () => applyPreset("timeline"));
+  document.getElementById("preset-sla")?.addEventListener("click", () => applyPreset("sla"));
+  document.getElementById("preset-aging")?.addEventListener("click", () => applyPreset("aging"));
+  document.getElementById("preset-workload")?.addEventListener("click", () => applyPreset("workload"));
+  document.getElementById("preset-budget")?.addEventListener("click", () => applyPreset("budget"));
+
+  document.getElementById("generate-btn")?.addEventListener("click", generatePrompt);
+  document.getElementById("copy-btn")?.addEventListener("click", copyPrompt);
+  document.getElementById("clear-btn")?.addEventListener("click", clearForm);
+});
